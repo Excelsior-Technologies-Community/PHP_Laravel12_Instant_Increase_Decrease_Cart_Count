@@ -7,40 +7,49 @@ use App\Models\Product;
 
 class ProductController extends Controller
 {
-    // Product index page: Display all products in ascending order by ID
-    public function index()
+    // List products with search, filter, and pagination
+    public function index(Request $request)
     {
-        $products = Product::orderBy('id', 'asc')->get(); // Fetch products ordered by ID ascending
-        return view('products.index', compact('products')); // Pass products to the index view
+        $query = Product::query();
+
+        // Search by any field (name, description, price)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('description', 'like', "%$search%")
+                  ->orWhere('price', 'like', "%$search%");
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Paginate results (4 per page)
+        $products = $query->paginate(4)->withQueryString();
+
+        return view('products.index', compact('products'));
     }
 
-    // Product create page: Show form to add a new product
+    // Show create form
     public function create()
     {
-        return view('products.create'); // Load the create product form
+        return view('products.create');
     }
 
-    // Store product: Save new product into database
+    // Store product
     public function store(Request $request)
     {
-        // Validate incoming request data
         $request->validate([
-            'name'        => 'required|string|max:255',           // Product name is required
-            'description' => 'nullable|string',                  // Description is optional
-            'price'       => 'required|integer|min:1',           // Price must be a positive integer
-            'status'      => 'required|in:active,inactive,deleted' // Status must be one of the defined enums
+            'name'=>'required|string',
+            'price'=>'required|numeric',
+            'status'=>'required|in:active,inactive'
         ]);
 
-        // Create product in database
-        Product::create([
-            'name'        => $request->name,        // Assign name
-            'description' => $request->description, // Assign description
-            'price'       => $request->price,       // Assign price
-            'status'      => $request->status,      // Assign status
-            'created_by'  => 1,                      // Static user ID for demo purposes
-        ]);
+        Product::create($request->all());
 
-        // Redirect to product index page with success message
-        return redirect()->route('products.index')->with('success', 'Product added successfully');
+        return redirect()->route('products.index')->with('success','Product added successfully');
     }
 }
