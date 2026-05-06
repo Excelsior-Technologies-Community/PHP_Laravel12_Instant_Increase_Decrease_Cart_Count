@@ -14,6 +14,8 @@ class Product extends Model
         'name',        // Product name
         'description', // Product description
         'price',       // Product price
+        'image',       // Product image 
+        'stock',       // Product stock 
         'status',      // Product status: active, inactive, deleted
         'created_by',  // User ID who created the product
         'updated_by',  // User ID who last updated the product

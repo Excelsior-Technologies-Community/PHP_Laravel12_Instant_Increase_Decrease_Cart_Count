@@ -39,17 +39,36 @@ class ProductController extends Controller
         return view('products.create');
     }
 
-    // Store product
+    
     public function store(Request $request)
     {
+        
         $request->validate([
-            'name'=>'required|string',
-            'price'=>'required|numeric',
-            'status'=>'required|in:active,inactive'
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price'       => 'required|numeric|min:0',
+            'stock'       => 'required|integer|min:0', 
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', 
+            'status'      => 'required|in:active,inactive'
         ]);
 
-        Product::create($request->all());
+        $data = $request->all();
 
-        return redirect()->route('products.index')->with('success','Product added successfully');
+        
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            
+            
+            $image->move(public_path('uploads/products'), $imageName);
+            
+            
+            $data['image'] = 'uploads/products/' . $imageName;
+        }
+
+        
+        Product::create($data);
+
+        return redirect()->route('products.index')->with('success', 'Product added successfully with Stock and Image!');
     }
 }

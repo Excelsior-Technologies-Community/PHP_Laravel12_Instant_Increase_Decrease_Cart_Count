@@ -13,8 +13,13 @@ return new class extends Migration {
 
             $table->string('name'); // Product name
             $table->text('description')->nullable(); // Product description (optional)
-
+            
             $table->integer('price'); // Product price (integer, can change to decimal if needed)
+
+            // --- નવું ઉમેરેલું (Image અને Stock) ---
+            $table->string('image')->nullable(); // Product image (optional)
+            $table->integer('stock')->default(0); // Available stock quantity
+            // ---------------------------------------
 
             // Enum status field with default 'active'
             $table->enum('status', ['active', 'inactive', 'deleted'])

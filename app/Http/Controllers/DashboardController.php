@@ -9,11 +9,15 @@ class DashboardController extends Controller
     public function index()
     {
         $cart = session()->get('cart', []);
+        
         $totalQty = collect($cart)->sum('quantity');
+        
         $totalPrice = collect($cart)->sum(function ($item) {
-            return $item['price'] * $item['quantity']; });
-        $lastAdded = end($cart);
+            return $item['price'] * $item['quantity'];
+        });
+        
+        $lastAdded = end($cart) ?: null;
 
-        return view('dashboard', compact('totalQty', 'totalPrice', 'lastAdded'));
+        return view('dashboard', compact('cart', 'totalQty', 'totalPrice', 'lastAdded'));
     }
 }
